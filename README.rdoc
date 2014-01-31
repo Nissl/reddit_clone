@@ -1,0 +1,1 @@
+John Morgan's week 1 Rails project for the Tealeaf Academy course Rapid Prototyping with Ruby on Rails.

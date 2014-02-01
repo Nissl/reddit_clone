@@ -1,114 +1,162 @@
 1. Why do they call it a relational database?
 
-It's a database in which features are related, with rows defining one set of relationships and columns defining the different features. The storage method is reminiscent of spreadsheets. Relational databases like MySQL, Postgres, and Sqlite differ from non-relational databases like MongoDB, where data may be stored in a different format.
+It's a database comprised of different tables, with rows defining one set of 
+relationships and columns defining the different features. These tables are 
+related to each other via foreign keys or join tables. Relational databases 
+like MySQL, Postgres, and Sqlite differ from non-relational databases like 
+MongoDB, where data may be stored in a different format.
 
 2. What is SQL?
 
-SQL stands for structured query language. This is the standard, fundamental language used to make requests and add things to relational databases. It is abstracted away by ActiveRecord in rails.
+SQL stands for structured query language. It is the standard, fundamental 
+language used to make requests and add things to relational databases. It is 
+abstracted away by ActiveRecord in rails.
 
-3. There are two predominant views into a relational database. What are they, and how are they different?
+3. There are two predominant views into a relational database. What are they, 
+and how are they different?
 
-The schema, which shows each of the properties of an entry in the database, and the data itself, which shows the entries in the database.
+The schema view, which shows each of the properties of an entry in the database, 
+and the data view itself, which shows the entries in the database.
 
-4. In a table, what do we call the column that serves as the main identifier for a row of data? We're looking for the general database term, not the column name.
+4. In a table, what do we call the column that serves as the main identifier 
+for a row of data? We're looking for the general database term, not the column 
+name.
 
 It's called the primary key, and is unique to a row of data within the table.
 
 5. What is a foreign key, and how is it used?
 
-A foreign key relates data in one table to data in second table by storing the primary key of the second table as an column in the original table, or storing relational primary key information in a join table. 
+A foreign key relates data in one table to data in second table by storing the 
+primary key of the second table as an column in the original table, or storing 
+relational primary key information in a join table. 
 
-6. At a high level, describe the ActiveRecord pattern. This has nothing to do with Rails, but the actual pattern that ActiveRecord uses to perform its ORM duties.
+*Added from answers: note that it is always stored on the "many" side of an
+association and always an integer
 
-I'm not sure quite what this question is asking. ActiveRecord is basically abstracting away the SQL that is used to perform database functions. (The actual SQL it uses is visible when we query or change the database in rails console.)
+6. At a high level, describe the ActiveRecord pattern. This has nothing to do 
+with Rails, but the actual pattern that ActiveRecord uses to perform its ORM 
+duties.
 
-7. If there's an ActiveRecord model called "CrazyMonkey", what should the table name be?
+I'm not sure quite what this question is asking. ActiveRecord is basically 
+abstracting away the SQL that is used to perform database functions. (The 
+actual SQL it uses is visible when we query or change the database in rails 
+console.)
+
+7. If there's an ActiveRecord model called "CrazyMonkey", what should the 
+table name be?
 
 crazy_monkeys
 
-You can double-check this by typing "CrazyMonkey".tableize in rails console.
+(You can double-check this by typing "CrazyMonkey".tableize in rails console.)
 
-8 If I'm building a 1:M association between Project and Issue, what will the model associations and foreign key be?
-class Project < ActiveRecord::Base
-  has_many :issues
-end
+8 If I'm building a 1:M association between Project and Issue, what will the 
+model associations and foreign key be?
 
-class Issue < ActiveRecord::Base
-  belongs_to :project
-end
+*note, added foreign_key from answers, did not realize question wanted it 
+explicitly stated, which it doesn't need to be
+
+Project model:
+
+	class Project < ActiveRecord::Base
+	  has_many :issues, foreign_key: :project_id
+	end
+
+Issue model:
+
+	class Issue < ActiveRecord::Base
+	  belongs_to :project, foreign_key: :project_id
+	end
 
 
 9. Given this code
-class Zoo < ActiveRecord::Base
-  has_many :animals
-end
+	class Zoo < ActiveRecord::Base
+	  has_many :animals
+	end
 
-a) What do you expect the other model to be and what does database schema look like?
+a) What do you expect the other model to be and what does database schema look 
+like?
 
-class Animal < ActiveRecord::Base
-  belongs_to :zoo
-end
+	class Animal < ActiveRecord::Base
+	  belongs_to :zoo
+	end
 
 1:M
 
-b) What are the methods that are now available to a zoo to call related to animals?
+b) What are the methods that are now available to a zoo to call related to 
+animals?
 
 zoo.animals(.first etc)
 
 c) How do I create an animal called "jumpster" in a zoo called "San Diego Zoo"?
 
-zoo = Zoo.create(name: "San Diego Zoo")
-zoo << Animal.create(name: "jumpster")
+	zoo = Zoo.create(name: "San Diego Zoo")
+	zoo << Animal.create(name: "jumpster")
+or
+	animal = Animal.create(name: "jumpster", zoo_id: 1)
 
-10. What is mass assignment? What's the non-mass assignment way of setting values?
+10. What is mass assignment? What's the non-mass assignment way of setting 
+values?
 
 Mass assignment is when all features are assigned to an entry at once, e.g.
 
-Animal.create(name: "jumpster", speed: 10, hungry: false)
+	Animal.create(name: "jumpster", speed: 10, hungry: false)
 
-The alternative is to create the entry, then assign the features one at a time:
-new_animal = Animal.new
-new_animal.name = "jumpster"
-new_animal.speed = 10
-new_animal.hungry = false
-new_animal.save
+The alternative is to create the entry, then assign the features one at a 
+time, which involves a lot more typing:
+
+	new_animal = Animal.new
+	new_animal.name = "jumpster"
+	new_animal.speed = 10
+	new_animal.hungry = false
+	new_animal.save
 
 11. What does this code do? Animal.first
 returns the first entry in the table animals
 SQL: SELECT "animals".* FROM "animals" ORDER BY "animals"."id" ASC LIMIT 1
 
-12. If I have a table called "animals" with columns called "name", and a model called Animal, how do I instantiate an animal object with name set to "Joe". Which methods makes sure it saves to the database?
-rails console:
-Animal.create(name: "Joe")
+12. If I have a table called "animals" with columns called "name", and a model 
+called Animal, how do I instantiate an animal object with name set to "Joe". 
+Which methods makes sure it saves to the database?
 
-Or: 
-animal = Animal.new 
-animal.save
+rails console:
+	Animal.create(name: "Joe")
+
+another option in rails console: 
+	animal = Animal.new 
+	animal.save
 
 13. How does a M:M association work at the database level?
-It works via a join table, which combines foreign_key data from multiple tables. 
+It works via a join table, which combines foreign key data from multiple tables. 
 
+14. What are the two ways to support a M:M association at the ActiveRecord model 
+level? Pros and cons of each approach?
 
-14. What are the two ways to support a M:M association at the ActiveRecord model level? Pros and cons of each approach?
+One is habtm (has_and_belongs_to_many). This way is very slightly simpler, but 
+then the join table cannot contain any additional info about the relationship. 
 
-One is habtm (has_and_belongs_to_many). This way is very slightly simpler, but then the join table 
-cannot contain any additional info about the relationship. 
+The other is hmt (has_many through). It takes just a bit more typing to do, as 
+it requires the explicit creation of the join table via a db migration and 
+layout of the model, but it allows additional information about the 
+relationship. There's very little reason not to do it this way, unless you're 
+absolutely sure you'll never need to add more information, and even then....
 
-The other is hmt (has_many through). It takes just a bit more typing to do, but it allows additional information about the relationship. There's very little reason not to do it this way, unless you're absolutely sure you'll never need to add more information, and even then....
+15. Suppose we have a User model and a Group model, and we have a M:M 
+association all set up. How do we associate the two?
 
-15. Suppose we have a User model and a Group model, and we have a M:M association all set up. How do we associate the two?
+- create a join table, user_groups
+- create a join model, UserGroup
 
-class User << ActiveRecord::Base
-  has_many :user_groups
-  has_many :groups, through: :user_groups
-end
+	class User << ActiveRecord::Base
+	  has_many :user_groups
+	  has_many :groups, through: :user_groups
+	end
 
-class Group << ActiveRecord::Base
-  has_many :user_groups
-  has_many :users, through: :user_groups
-end
+	class Group << ActiveRecord::Base
+	  has_many :user_groups
+	  has_many :users, through: :user_groups
+	end
 
-class UserGroup << ActiveRecrord::Base
-  belongs_to :user
-  belongs_to :post
-end
+	class UserGroup << ActiveRecrord::Base
+	  belongs_to :user
+	  belongs_to :post
+	end

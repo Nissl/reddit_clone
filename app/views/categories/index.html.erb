@@ -1,0 +1,14 @@
+<%= render 'shared/content_title', title: 'Category List' %>
+
+<div class='well span6'>
+  <ul>
+    <% @categories.each do |category| %>
+      <li><%= category.name %></li>
+    <% end %>
+  </ul>
+</div>
+
+<div class='well span6'>
+  <%= link_to 'Back to Main', posts_path %>
+</div>
+

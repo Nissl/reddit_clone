@@ -1,0 +1,24 @@
+<%= render 'shared/content_title', title: 'Add New Category' %>
+
+<% if @category.errors.any? %>
+  <div class='row'>
+    <div class='alert alert-error span6'>
+      <ul>
+      <% @category.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+    </div>
+  </div>
+<% end %>
+
+<div class='well span6'>
+  <%= form_for @category do |f| %>
+    <div class='control-group'>
+      <%= f.label :name, 'New Category: ' %>
+      <%= f.text_field :name %>
+      <br/>
+      <%= f.submit 'Add Category', class: 'btn btn-primary' %>
+    </div>
+  <% end %>
+</div>

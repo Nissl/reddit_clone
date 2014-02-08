@@ -5,6 +5,8 @@ PostitTemplate::Application.routes.draw do
   resources :posts, except: [:destroy] do
     resources :comments, only: [:create]
   end
+
+  resources :categories, only: [:index, :new, :create, :show]
 end
 
 # stock set of routes, replaced by resources :posts

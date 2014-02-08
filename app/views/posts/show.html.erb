@@ -1,4 +1,16 @@
-<h1>You're viewing the post titled: <%= @post.title %></h1>
+<p class='pull-right'>
+  <%= link_to 'Edit This Post', edit_post_path(@post) %>
+</p>
+
+<p>
+  <%= render @post.categories %>
+</p>
+
+<%= render 'shared/content_title', title: @post.title %>
+
+<p>
+<%= @post.description %>
+</p>
 
 <% if @comment.errors.any? %>
   <div class = "alert alert-error">
@@ -12,6 +24,7 @@
 
 <h5>Create a comment:</h5>
 <%= form_for [@post, @comment] do |f| %>
+
   <%= f.text_area :body %>
   <br/>
   <%= f.submit "Create Comment", class: "btn btn-prmary" %>

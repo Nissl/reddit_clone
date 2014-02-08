@@ -6,7 +6,7 @@ class Post < ActiveRecord::Base
 
   # min length, max length, many more options available
   # if validation failed, attaches errors - post.errors, post.errors.full_messages
-  validates :title, presence: true
-  validates :url, presence: true
-  validates :description, presence: true
+  validates :title, presence: true, length: {minimum: 8}
+  validates :url, presence: true, uniqueness: true
+  validates :description, presence: true, length: {minimum: 10}
 end

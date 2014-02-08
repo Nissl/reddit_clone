@@ -3,6 +3,7 @@ class CommentsController < ApplicationController
   def create
     @post = Post.find(params[:post_id])
     @comment = Comment.new(comment_params)
+    @comment.creator = User.first #todo: change with authentication
     @comment.post_id = params[:post_id]
 
     if @comment.save

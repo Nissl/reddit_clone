@@ -3,7 +3,7 @@ PostitTemplate::Application.routes.draw do
 
 
   resources :posts, except: [:destroy] do
-    resources :comments, only: [:create, :show]
+    resources :comments, only: [:create]
   end
 end
 
@@ -15,4 +15,4 @@ end
   # get '/posts/:id/edit', to: 'posts#edit'
   # patch '/posts/:id', to: 'posts#update'
 
-# can set controller with: ", controller: 'images'"
+# can set controller with: ", controller: 'controller_name'"

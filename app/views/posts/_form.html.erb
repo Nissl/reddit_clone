@@ -1,0 +1,30 @@
+<!-- used by new, create (fail), edit, update (fail) -->
+<h4>Rails model-backed form helpers<h4>
+
+<% if @post.errors.any? %>
+  <div class = "alert alert-error">
+  <h5>There were the following errors:</h5>
+  <ul>
+    <% @post.errors.full_messages.each do |msg| %>
+    <li><%= msg %></li>
+    <% end %>
+  </ul>
+  </div>
+<% end %>
+
+<!--form_for does a lot of guessing - can handle new, update. 
+therefore, form partials!-->
+<%= form_for @post do |f| %>
+<!-- can only refer to attributes or virtual attributes, unlike basic helpers/HTML -->
+  <%= f.label :title, 'Input Title:' %>
+  <%= f.text_field :title %>
+  <br/>
+  <%= f.label :url, 'Input Link URL:' %>
+  <%= f.text_field :url %>
+  <br/>
+  <%= f.label :description, 'Describe Post:' %>
+  <%= f.text_area :description %>
+  <br/>
+  <%= f.submit "Create Post", class: "btn btn-primary" %>
+
+<% end %>

@@ -1,18 +1,7 @@
 <!-- used by new, create (fail), edit, update (fail) -->
 <!--<h4>Rails model-backed form helpers<h4>-->
 
-<% if @post.errors.any? %>
-  <div class='row'>
-    <div class = 'alert alert-error span6'>
-      <h5>Your post could not be created due to the following errors:</h5>
-      <ul>
-        <% @post.errors.full_messages.each do |msg| %>
-        <li><%= msg %></li>
-        <% end %>
-      </ul>
-    </div>
-  </div>
-<% end %>
+<%= render 'shared/errors', obj: @post %>
 
 <!--form_for does a lot of guessing - can handle new, update. 
 therefore, form partials!-->
@@ -33,6 +22,13 @@ therefore, form partials!-->
       <%= f.label :description, 'Describe Post:' %>
       <%= f.text_area :description, rows: 4 %>
     </div>
+      <br/>
+
+      <select name = 'post[options][]', multiple = 'multiple'>
+        <option value = '1'>option 1</option>
+        <option value = '2'>option 2</option>
+      </select>
+      
       <br/>
       <%= f.submit @post.new_record? ? "Create Post" : "Save Edits", class: "btn btn-primary" %>
     </div>

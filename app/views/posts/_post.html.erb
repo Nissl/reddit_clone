@@ -1,9 +1,7 @@
-<% link_out = "http://#{post.url}" %>
-
 <div class='row'>
   <div class='well span6'>
     <%= render post.categories %>
-    <h4><%= link_to post.title, link_out %></h4>
+    <h4><%= link_to post.title, fix_url(post.url) %></h4>
     <p><%= post.description %></p>
     <p>
       <span class='quiet'>posted by</span> <%= post.creator.username %>

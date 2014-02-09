@@ -9,22 +9,16 @@
 <%= render 'shared/content_title', title: @post.title %>
 
 <p>
+  <%= link_to 'Link to article', fix_url(@post.url) %>
+</p>
+
+<p>
 <%= @post.description %>
 </p>
 
-<% if @comment.errors.any? %>
-  <div class = "alert alert-error">
-  <ul>
-    <% @comment.errors.full_messages.each do |msg| %>
-      <li><%= msg %></li>
-    <% end %>
-  </ul>
-  </div>
-<% end %>
-
 <h5>Create a comment:</h5>
-<%= form_for [@post, @comment] do |f| %>
-
+<%= render 'shared/errors', obj: @comment %>
+<%= form_for [@post, @comment] do |f| %> <!-- submit to posts/:post_id/comments -->
   <%= f.text_area :body %>
   <br/>
   <%= f.submit "Create Comment", class: "btn btn-prmary" %>
@@ -32,8 +26,13 @@
 
 <% if @post.comments.any? %>
   <ul>
-    <% @post.comments.each do |comment| %>
-    <li><%= comment[:body] %></li>
+   <% @post.comments.each do |comment| %>
+     <div class="well span6">
+       <li>
+          <p><%= comment[:body] %><p>
+          by <%= @user.username %> at <%= comment.created_at %>
+       </li>
+     </div>
     <% end %>
 <% end %>
 

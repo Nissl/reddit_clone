@@ -9,6 +9,7 @@ class PostsController < ApplicationController
 
   def show
     @comment = Comment.new
+    @user = User.first
   end
 
   def new
@@ -16,6 +17,7 @@ class PostsController < ApplicationController
   end
 
   def create
+    binding.pry
     @post = Post.new(post_params)
     @post.creator = User.first #TODO: change once we learn authentication
     if @post.save

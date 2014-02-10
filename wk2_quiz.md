@@ -32,6 +32,7 @@ It's a rails form helper that operates based on a specific object in the model. 
 
 5. What's the general pattern we use in the actions that handle submission of model-backed forms (ie, the `create` and `update` actions)?
 
+```
 @object = Object.new(params.require(:object).permit(:object_attribute_1, etc.))
 
 if @object.save
@@ -39,6 +40,7 @@ if @object.save
 	redirect_to %(index page or saved object, as appropriate)
 else
 	render %(current page) # pop up an error message, as errors are attached to object
+```
 
 6. How exactly do Rails validations get triggered? Where are the errors saved? How do we show the validation messages on the user interface?
 

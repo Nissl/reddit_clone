@@ -35,7 +35,7 @@
 	@object = Object.new(params.require(:object).permit(:object_attribute_1, etc.))
 
 	if @object.save
-		flash[:notice] = "some notice"
+		flash[:notice] = "Successful save message"
 		redirect_to %(index page or saved object, as appropriate)
 	else
 		render %(current page) # pop up an error message, as errors are attached to object

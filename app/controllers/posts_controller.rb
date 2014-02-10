@@ -47,7 +47,8 @@ class PostsController < ApplicationController
   private
 
   def post_params
-    params.require(:post).permit(:title, :url, :description, :category_ids => [])
+    params.require(:post).permit(:title, :url, :description, category_ids: [])
+    # :category_ids => []
   end
 
   def set_post
@@ -56,32 +57,4 @@ class PostsController < ApplicationController
 
 end
 
-# create method notes
-    # Pass in from html
-    # Post.create(params[:title], params[:url], params[:description])
 
-    # Pass in from basic rails form
-    # Post.create(title: params[:title], url: params[:url], description: 
-    #   params[:description], user_id: 1)
-
-    # e.g. title is a setter method from ActiveRecord pattern
-
-    # Model-backed form, Rails 3
-    # Post.create(params[:post]) #mass assignment because post is a hash
-  
-    # Mass assignment security - Rails 3 had attr_accessible in post.rb,
-    # whitelist things, eventually you wind up whitelisting everything
-    # post = Post.new(params[:post])
-    # Rails 4, strong parameters
-
-
-# Post params notes
-    # best practices around strong params still emerging
-    # non-permitted stuff gets wiped, source of silent bugs, blah, but important
-    # to not let potential hackers know what's going on
-    # params.require(:post).permit(:title, :url, :description, :creator)
-    # params.require(:post).permit! # Allow everything
-    #if user.admin?
-    #  permit!
-    #else
-    #  permit (:title, :url, :description, :creator)

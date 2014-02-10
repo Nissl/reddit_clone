@@ -4,7 +4,7 @@
 	````
 		resources :posts
 
-		path, routes, controller/action
+		routes, controller/action, (path)
 
 		GET /posts posts#index (posts_path)
 		POST /posts posts#create (posts_path)

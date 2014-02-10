@@ -53,7 +53,10 @@ Rails helpers are functions that abstract out bits of repetitive logic used thro
 
 8. What are Rails partials?
 
-Rails partials are fragments of a view that contain bits of erb/html/etc. that are reused throughout the application. They can be called with <%= render 'partial path', (variable in partial): (thing variable in partial is set to in this view) %>
+Rails partials are fragments of a view that contain bits of erb/html/etc. that are reused throughout the application. They can be called with 
+```
+<%= render 'partial path', (variable in partial): (thing variable in partial is set to in this view) %>
+```
 
 9. When do we use partials vs helpers?
 

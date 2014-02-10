@@ -1,20 +1,21 @@
 # Week 2 Quiz
 1. Name all the 7 (or 8) routes exposed by the `resources` keyword in the `routes.rb` file. Also name the 4 named routes, and how the request is routed to the controller/action.
 
-	````
-		resources :posts
+```
+	resources :posts
 
-		routes, controller/action, (path)
+	path, routes, controller/action
 
-		GET /posts posts#index (posts_path)
-		POST /posts posts#create (posts_path)
-		GET /posts/new posts#new (new_post_path) 
-		GET /posts/:id/edit posts#edit (edit_post_path)
-		GET /posts/:id posts#show (post_path) 
-		PATCH /posts/:id posts#update (post_path)
-		PUT /posts/:id posts#update (post_path)
-		DELETE /posts/:id posts#destroy (post_path)
-	````
+	'GET /posts', to: posts#index (posts_path)
+	'POST /posts', to: posts#create (posts_path)
+	'GET /posts/new', to: posts#new (new_post_path) 
+	'GET /posts/:id/edit', to: posts#edit (edit_post_path)
+	'GET /posts/:id', to: posts#show (post_path) 
+	'PATCH /posts/:id', to: posts#update (post_path)
+	'PUT /posts/:id', to: posts#update (post_path)
+	'DELETE /posts/:id', to: posts#destroy (post_path)
+```
+	note: reformatted after looking at solutions, adding quotes and to: to more accurately reflect the routes being replaced by resources:. The original formatting looked more like the output of rake routes.
 
 2. What is REST and how does it relate to the `resources` routes?
 	<br/><br/>
@@ -52,7 +53,10 @@
 
 8. What are Rails partials?
 	<br/><br/>
-	Rails partials are fragments of a view that contain bits of erb/html/etc. that are reused throughout the application. They can be called with <%= render 'partial path', (variable in partial): (thing variable in partial is set to in this view) %>
+	Rails partials are fragments of a view that contain bits of erb/html/etc. that are reused throughout the application. They can be called with:
+	```	
+	<%= render 'partial path', (variable in partial): (thing variable in partial is set to in this view) %>
+	```
 
 9. When do we use partials vs helpers?
 	<br/><br/>

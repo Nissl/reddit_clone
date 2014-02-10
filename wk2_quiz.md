@@ -15,7 +15,7 @@
 	'PUT /posts/:id', to: posts#update (post_path)
 	'DELETE /posts/:id', to: posts#destroy (post_path)
 ```
-	note: reformatted slghtly after looking at solutions
+	note: reformatted after looking at solutions, adding quotes and to: to more accurately reflect the routes being replaced by resources:. The original formatting looked more like the output of rake routes.
 
 2. What is REST and how does it relate to the `resources` routes?
 

@@ -21,6 +21,8 @@ class PostsController < ApplicationController
     #binding.pry
     @post = Post.new(post_params)
     @post.creator = User.first #TODO: change once we learn authentication
+    @post.title.capitalize!
+    @post.description.capitalize!
     if @post.save
       flash[:notice] = "Your post was created"
       redirect_to posts_path

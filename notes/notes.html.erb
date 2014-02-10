@@ -1,0 +1,33 @@
+      <!-- single select dropdown
+      <%= select_tag "category_id", options_from_collection_for_select(Category.all, "id", "name"), :multiple = "multiple" %>
+      -->
+
+            <!-- working checkboxes
+    <div class = 'control-group'>
+      <%= f.label "Categories:" %>
+      <% Category.all.each do |category| %>
+        <%= label_tag :category, category.name, class: "checkbox inline" %>
+        <%= check_box_tag 'post[category_ids][]', category.id, @post.category_ids.include?(category.id) %>
+      <% end %>
+    </div>
+      -->
+
+      <!-- single select dropdown
+      <%= select_tag "category_id", options_from_collection_for_select(Category.all, "id", "name"), :multiple = "multiple" %>
+      -->
+
+
+      <!-- HTML categories:
+      <select name = 'post[options][]', multiple = 'multiple'>
+        <option value = '1'>option 1</option>
+        <option value = '2'>option 2</option>
+      </select>
+      -->
+
+      <!-- working multi-dropdown mbf select
+      <%= f.collection_select(:category_ids, Category.all, :id, :name, {}, {:multiple => true, :id => 'category_select'}) %>
+      -->
+
+      <!-- working multi-checkbox mbf select (can't inline)
+      <%= f.collection_check_boxes(:category_ids, Category.all, :id, :name, {}, {:multiple => true, :id =>'category_select'}) %>
+      -->

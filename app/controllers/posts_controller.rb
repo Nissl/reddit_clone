@@ -14,10 +14,11 @@ class PostsController < ApplicationController
 
   def new
     @post = Post.new
+    @category = Category.new
   end
 
   def create
-    binding.pry
+    #binding.pry
     @post = Post.new(post_params)
     @post.creator = User.first #TODO: change once we learn authentication
     if @post.save
@@ -26,10 +27,11 @@ class PostsController < ApplicationController
     else 
       render :new 
     end
-
   end
 
-  def edit; end
+  def edit
+    @category = Category.new
+  end
 
   def update
     if @post.update(post_params)
@@ -43,7 +45,7 @@ class PostsController < ApplicationController
   private
 
   def post_params
-    params.require(:post).permit(:title, :url, :description)
+    params.require(:post).permit(:title, :url, :description, :category_ids => [])
   end
 
   def set_post

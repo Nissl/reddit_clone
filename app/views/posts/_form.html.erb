@@ -24,13 +24,15 @@ therefore, form partials!-->
     </div>
       <br/>
 
-      <select name = 'post[options][]', multiple = 'multiple'>
-        <option value = '1'>option 1</option>
-        <option value = '2'>option 2</option>
-      </select>
-      
+    <%= f.label :category_ids, 'Select Categories:' %>
+    <div class='control-group'>
+      <%= f.collection_select(:category_ids, Category.all.order(:name), :id, :name, {}, {:multiple => true, :id => 'category_select'}) %>
+    </div>
+
       <br/>
       <%= f.submit @post.new_record? ? "Create Post" : "Save Edits", class: "btn btn-primary" %>
     </div>
   <% end %>
 </div>
+
+

@@ -39,6 +39,7 @@
 		redirect_to %(index page or saved object, as appropriate)
 	else
 		render %(current page) # pop up an error message, as errors are attached to object
+	end
 	```
 
 6. How exactly do Rails validations get triggered? Where are the errors saved? How do we show the validation messages on the user interface?

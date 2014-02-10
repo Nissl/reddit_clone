@@ -1,11 +1,5 @@
 <%= render 'shared/content_title', title: 'Welcome to John\'s Fake Reddit!' %>
 
-
-<div class="row">
-  <p><%= link_to 'Submit a New Post', new_post_path %></p>
-</div>
-<br/>
-
 <% @posts.reverse.each do |post| %>
   <%= render 'post', post: post %>
 <% end %>

@@ -1,6 +1,7 @@
 <%= render 'shared/content_title', title: "Profile: #{@user.username}" %>
 
 <div class="well">
+  <!-- div class='dl-horizontal' -->
   <ul>
     <li><strong>Username:</strong> <%= @user.username %></li>
     <li><strong>Time zone:</strong> We didn't do this yet</li>
@@ -9,11 +10,16 @@
   </ul>
 </div>
 
-<h5><%= @user.username %>'s Posts:</h5>
+<h5><%= @user.username %>'s Activity:</h5>
 
+<!-- note to self, see 22:00 of video for official solution using params[:tab] to turn elements of the display off and on -->
 <ul class="nav nav-tabs">
-  <li class="active"><a href="#posts" data-toggle="tab">Posts (<%= @user.posts.size %>)</a></li>
-  <li><a href="#comments" data-toggle="tab">Comments (<%= @user.comments.size %>)</a></li>
+  <li class="active"><a href="#posts" data-toggle="tab">
+    Posts (<%= @user.posts.size %>)</a>
+  </li>
+  <li><a href="#comments" data-toggle="tab">
+    Comments (<%= @user.comments.size %>)</a>
+  </li>
 </ul>
 
 <div class="tab-content">

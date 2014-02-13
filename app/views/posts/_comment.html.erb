@@ -1,0 +1,9 @@
+<div class="well span6">
+  <p>"<%= comment[:body] %>"
+  <% if post_link %>
+    at <%= link_to comment.post.title, post_path(comment.post) %>
+  <% end %>
+  <p>
+  <span class="quiet">by <%= comment.creator.username %> 
+    at <%= fix_time(comment.created_at) %></span>
+</div>

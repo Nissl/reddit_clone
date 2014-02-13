@@ -2,6 +2,7 @@ class PostsController < ApplicationController
   #rails 3: before_filter
   #use before_action for instance variables, redirect on condition
   before_action :set_post, only: [:show, :edit, :update]
+  before_action :require_user, except: [:index, :show]
 
   def index
     @posts = Post.all
@@ -9,7 +10,6 @@ class PostsController < ApplicationController
 
   def show
     @comment = Comment.new
-    @user = User.first
   end
 
   def new
@@ -18,11 +18,11 @@ class PostsController < ApplicationController
   end
 
   def create
-    #binding.pry
     @post = Post.new(post_params)
-    @post.creator = User.first #TODO: change once we learn authentication
+    @post.creator = current_user 
     @post.title.capitalize!
     @post.description.capitalize!
+    
     if @post.save
       flash[:notice] = "Your post was created"
       redirect_to posts_path
@@ -32,7 +32,12 @@ class PostsController < ApplicationController
   end
 
   def edit
-    @category = Category.new
+    if current_user == @post.creator
+      @category = Category.new
+    else
+      flash[:error] = "You must be the post creator to edit"
+      redirect_to post_path(@post)
+    end
   end
 
   def update

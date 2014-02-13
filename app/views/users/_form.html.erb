@@ -1,0 +1,17 @@
+<div class='well span6'>
+  <%= render 'shared/errors', obj: @user %>
+  <%= form_for @user do |f| %>
+  <!-- can only refer to attributes or virtual attributes, unlike basic helpers/HTML -->
+    <div class='control-group'>
+      <%= f.label :username, 'Input Username:' %>
+      <%= f.text_field :username %>
+    </div>
+      <br/>
+    <div class='control-group'>
+      <%= f.label :password, 'Input Password:' %>
+      <%= f.password_field :password %>
+    </div>
+      <br/>
+      <%= f.submit @user.new_record? ? "Register" : "Save Changes", class: "btn btn-primary" %>
+  <% end %>
+</div>

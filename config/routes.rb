@@ -1,12 +1,17 @@
 PostitTemplate::Application.routes.draw do
   root to: 'posts#index' #just root is ok here too
 
+  get '/register', to: 'users#new'#, as: 'register'
+  get '/login', to: "sessions#new"
+  post '/login', to: "sessions#create"
+  get '/logout', to: "sessions#destroy"
 
   resources :posts, except: [:destroy] do
     resources :comments, only: [:create]
   end
 
   resources :categories, only: [:index, :new, :create, :show]
+  resources :users, only: [:show, :create, :edit, :update]
 end
 
 # stock set of routes, replaced by resources :posts

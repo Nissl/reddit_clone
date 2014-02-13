@@ -1,0 +1,147 @@
+Asset pipeline: obfuscate JS/CSS and compress static objects in deployment
+Was done with gems - JamIt (??)
+When coding, lots of CSS and JS files in a real site - a few dozen pretty common
+Often due to developers splitting up a project, merge them together at production time. 
+You can see the code looking through e.g. bootstrap JS files on your local server.
+In production, however, there's only one CSS and one JS file, and they're obfuscated.
+
+Some engine renames the variables, removes whitespace, etc. so that humans can't read it easily. Do this so people can't peek at JS code so easily (JM: but can still read a bit, and reverse engineer with a script pretty easily, no, so why bother?) But also for bandwidth purposes. Sending lots of files one at a time is slow! Plus you can just cache the full files once and then move around the site. (In dev, on the other hand, want to be able to make quick changes fast and see the difference.)
+
+At deployment, grab all assets, obfuscate, jam into file, move into public/assets directory. Large string at end of filename: "cache-buster" (not super official name!) Google Chrome e.g. is very aggressive about cacheing for speed. Can also cache at DNS level. Problem is that when things change you now have outdated data. With new deployment, the number changes so browser will go request new JS/CSS (I guess?) Nice handy Rails feature you don't need to worry about.
+
+Look at JS file (app/assets/javascripts/application.js). Most of it is comments, '//', but some lines '//=' *are* code (icky, Chris and I agree). This is a manifest file that uses the Sprockets library to manage assets. Used to have to use it outside of Rails, since 3 it has been built in though. Grabs files from everything after //= and squishes them into a file. Chris used JamIt on his prior projects instead, just because it works fine, does pretty much the same thing as here. 
+
+For CSS, app/assets/stylesheets, application.scss is pretty much the same deal. *= require self, and *= require tree . just means add anything else in the stylesheets folder. SCSS file because uses SASS (not something we cover explicitly, this is not pure CSS, this allows you to nest, and is terser than CSS, and lets libraries get reused.) Can write CSS in file, no problem. Anyway, manifest file is used by Sprockets. 
+
+When does Sprockets execute? We can do it anytime. See rake -t | grep precompile. Type rake assets:precompile to do this. Will do the stuff in the above couple blocks, plus also look under lib/assets. Will also compile Coffeescript to JS, etc.
+
+When does all of this matter? Working on team, strategy may be to precompile locally, then move to server. Option 2, run rake task at deployment. Generally, want to do second, but deployment takes longer by several minutes. Might be a big deal if you deploy often. Heroku does it automatically for us. So can delete public/assets (doesn't exist on my project atm.) If you forget to delete it, Heroku will use whatever is in the directory. So if you don't update/delete, won't come through in production.
+
+Authentication
+We're using has_secure_password, Rails built-in hashing mechanism (yay, bcrypt-ruby, with auto-salts (sheesh, talk about magic!)) Why not use Devise or other gems? Better to build a bit from scratch (well sorta, lol). Devise is a kitchen-sink gem, does extra stuff like forgotten password emails. Similar with slugging and FriendlyID.  
+
+The application should never know your password, should not email actual password. Save password through 1-way hash. Turn pass into indecipherable hash token. To authenticate, you hash the password the user put in and see if they match. Vulnerabilities are dictionary attacks, rainbow attacks. 
+
+Need a column to keep long token, call it password_digest. 
+rails generate migration add_password_digest_to_users
+def change
+  add_column :users, :password_digest, :string
+end
+rake db:migrate
+
+go to User model, add
+has_secure_password (No arguments needed, heh. Assumes password_digest field)
+
+rails Console
+User.first
+error! need bcrypt-ruby
+
+Go to Gemfile, add gem 'bcrypt-ruby'
+Run bundle install again (try to install 3.0.1, '=3.0.1')
+
+rails console
+User
+
+has_secure_password validations: false
+# Chris turns off the validation they've been baking in... overstepping bounds
+# Choose gems surgically that do one thing really well
+
+u.password = "password"
+u.save
+
+# Have a password virtual attribute, setter
+# Allows us to set values into password digest, autohash using bcrypt
+# Do we have a getter? Not if we exit out and wipe out of memory.
+
+u.password => nil
+u.authenticate('teststring')
+=> false
+u.authenticate('password')
+=> User object
+
+###
+This is all we need to build our authentication system at the model layer, actually!
+Part 2: controller & view
+###
+First, make a form to register new users. Need make users controller and routes.rb resources :users. Make controller new, create, edit, update and private user_params, following typical patterns. 
+(Can you DRY these methods up, since they're pretty repetitive? The rails creator David Hanson really, really dislikes this, but controversial. See DecentExposure and SimpleResources gems if interested.)
+Now, make views/users, make new, edit form partial. 
+Pretty much like other forms, with errors partial, MBF with user, template. New should just render the form, edit also the same with a different header.
+Add validations for username, presence: true, uniqueness: true
+Validates :password, presence: true, length: (minimum: 3), on :create #validation only fires when creating, 
+Test with binding.pry (not done in lecture)
+Add to routes.rb: get '/register', to: 'users#new' (, as: 'register')
+
+Add navbar link_to "Register", register_path
+
+Now, revisit routes. What's the deal with login and logout? Not performing CRUD on user. Now we need a session. 
+get '/login', to: 'sessions#new'
+post '/login', to: 'sessions#create'
+get '/logout', to 'sessions#destroy'
+
+Also change to resources :users, only: [:create] (new is being handled by register now)
+Btw, Chris generally likes resources to be models.
+
+Now go make a sessions_controller.rb, new, create, destroy
+Now go make the views for sessions. Here we use basic form helpers, not model backed forms (label_tag, text_field_tag).  We want to link these to e.g. params[:password] || "" in case there's an error so stuff still displays properly - model backed forms would have done this automagically.
+
+Controller code time. pseudocode: user.authenticate('password') so get user object, see if password matches via authenticate, if so, login, if not, then error message
+
+user = User.find(params[:username]) # note that no params doesn't come in, passwords come in clear; make sure you HTTPS (not that the NSA fucking minds) HTTPS requires a purchase of an SSL certificate and keeping it on the server. (Hope we cover that soon)
+
+user = User.find_by(username: params[:username])
+# don't need an instance variable, doesn't generate errors on object b/c not model-backed
+if user && user.authenticate(params[:password]) #first condition short-circuits, so no exception
+  session[:user_id] = user.id # don't save full user, cookies have a 4 kb limit
+  flash[:notice] = "You've logged in"
+  redirect_to root_path
+else 
+  flash[:error] = "There's something wrong with your username or password"
+  redirect_to register_path
+# don't be too specific and helpful here, because you'll help hackers
+end
+  
+def destroy
+  session[:user_id] = nil
+  flash[:notice] = "You've logged out!"
+  redirect_to root_path
+end
+
+In the navbar, if logged_in? show link_to logout_path
+else show register, log_in
+
+In application controller
+
+  helper_method :current_user, :logged_in?
+
+  def current_user
+    # if user, return user object
+    # else return nil
+    @current_user ||= User.find(session[:user_id]) if session[:user_id]
+  end
+
+  def logged_in?
+    !!current_user (double bang converts to original boolean value)
+  end
+
+#memoization: You're going to be calling e.g. current_user quite a bit. You don't want to hit the database over and over here. Saves value into @current_user, so only hit the database once. Still hit every request, but only once.
+
+# Now need to control who can control certain actions, e.g. by going to edit url
+go to posts_controller,
+before_action :require_user, except [:index, :show]
+
+put in application_controller
+
+def require_user
+  unless logged_in?
+    flash[:error] = "Must be logged in to do that"
+    redirect_to root_path
+  end
+end
+
+Should apply to create comment, etc. 
+
+@comment.creator = current_user (@comment.user.id = current_user.id)
+
+apply to post when creating
+@post.creator = current_user

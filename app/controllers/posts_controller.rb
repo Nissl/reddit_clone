@@ -1,11 +1,11 @@
 class PostsController < ApplicationController
   #rails 3: before_filter
   #use before_action for instance variables, redirect on condition
-  before_action :set_post, only: [:show, :edit, :update]
+  before_action :set_post, only: [:vote, :show, :edit, :update]
   before_action :require_user, except: [:index, :show]
 
   def index
-    @posts = Post.all
+    @posts = Post.all(:order => 'created_at DESC', :limit => 50).sort_by{|x| x.total_votes}
   end
 
   def show
@@ -47,6 +47,18 @@ class PostsController < ApplicationController
     else
       render :edit 
     end
+  end
+
+  def vote
+    #don't need strong paramaters because not mass assigning from input
+    @vote = Vote.create(vote: params[:vote], creator: current_user, voteable: @post)
+    if @vote.valid?
+      @vote.save
+      flash[:notice] = "Your vote was counted, thanks!"
+    else
+      flash[:error] = "Your vote was not counted."
+    end
+    redirect_to :back
   end
 
   private

@@ -145,3 +145,173 @@ Should apply to create comment, etc.
 
 apply to post when creating
 @post.creator = current_user
+
+
+Lecture 6 (content starts 1:40)
+Agenda: 
+Polymorphic associations (database, models)
+Voting
+
+Poly assoc is a different way of building 1:M associations.
+(review of foreign keys)
+User_id and post_id track different associations within comments table. Always have a user, but comments could go on a post, a photo, or a video. This is a polymorphic association - anything on 1 side of 1:M
+
+Why is this a problem to solve? Well, messy. Lots of empty cells. Add tons of foreign key columns. Instead, have an id column and a type column. In Rails, convention is ...able_type and ...able_id. E.g., commentable_type and commentable_id
+
+Here commentable_type is a string, commentable_id foreign key. "Composite foreign key"
+
+Rails has introduced conventions for this.
+
+ERD diagram. Vote has one attribute, boolean for upvote or downvote, user_id, and votable type and votable ID
+
+Only vote on post and comment in our app.
+
+Make votes table.
+rails generate migration create_votes
+
+def change
+  create_table :votes do |t|
+    t.boolean :vote
+    t.integer :user_id
+    t.string :voteable_type
+    t.integer :voteable_id
+    t.timestamps
+  end
+end
+
+Make vote model. 
+
+user.rb has_many :votes
+belongs_to :creator, class_name 'User', foreign_key: 'user_id'
+
+console: u.votes << Vote.create(vote: true)
+
+belongs_to :voteable, polymorphic: true
+
+class Comment, Post
+has_many :votes, as: voteable
+
+console
+v = Vote.first
+post = Post.first
+post.votes
+post.votes << v
+
+v.voteable = Comment.first
+v.save
+
+now, app, votes for post
+post partial
+<div class="span0 well text-center">
+  <%= link_to vote_post_path(post), method: 'post' do %>
+    <i class="icon-arrow-up"></i>
+  <% end %>
+  <%= link_to '' do %>
+    <i class="icon-arrow-down"></i>
+  <% end %>
+</div>
+
+routes.rb
+Two choices
+POST /votes => VotesController#create
+  needs two pieces of info (vote, post. Already have current user.)
+resources :votes, only: [:create]
+
+POST /posts/:id/vote => PostsController#vote
+POST /comments/:id/vote => CommentsController#vote
+
+resources :posts etc. do
+  member do
+    post :vote
+  end
+  resources :comments etc.
+end
+
+No black and white answer here. Lots of votes? First one might be best. Only troutes? Second. We'll do the second, partly for teaching.
+
+rake routes
+
+#no dynamic, for /posts/archives, just nested, doesn't pertain to one member
+collection do:
+  get :archives
+end
+
+Part 2 of Lecture 6
+Can change link_to with method: 'post' (see above)
+
+Why does this work? Attribute data-method = "post"
+
+There's actually some javascript that comes with Rails that picks that up.
+Looking at the code, it creates a form with method post and submits it to href. Nice little hack so you don't have to make a whole form manually here. Some people complain, Chris thinks it's great and uses it all the time.
+
+controller time.
+
+def vote
+  binding.pry
+end
+
+Params pass in vote ID
+Don't have the info on upvote or downvote, though
+Form needs an additional parameter
+Good news! JS respects all parameters specified in link
+How to specify? in url: ?vote=true&param2=2&param3=5
+In our link_to, we have to put it in the path
+
+link_to vote_post_path(post, vote: true, something: 'else')
+
+before_action, :set_post, only: [:vote]
+
+def vote
+  @post = Post.find(params[:id])
+  @vote = Vote.create(voteable: @post, creator: current_user, vote:params[:vote])
+
+  if @vote.valid?
+    flash[:notice] = "Your vote was counted"
+  else
+    flash[:error] = "Your vote was not counted"
+  end
+  redirect_to :back #nice little shortcut, go back to referring URL
+end
+
+#Setup false vote - straightforward
+
+display vote info
+<%= post.votes.size %>
+
+Wait, that just shows the total vote number.
+Need to do calcs! Helper method? But this is "business logic." Into the model with it.
+
+in post.rb
+
+def total_votes
+  up_votes - down_votes
+end
+
+def up_votes
+  self.votes.where(vote: true).size
+end
+
+def down_votes
+  self.votes.where(vote: false).size
+end
+
+in view
+<%= post.total_votes %> votes
+
+in controller, you could do this:
+Post.all.sort_by{|x| x.total_votes}.reverse
+
+#Dangerous, probably don't want to do Post.all, but limit by say last 10
+#Still need to wire comments on your own
+#Lock down arrows with logged_in?
+#Require_user to vote
+#How to prevent user from voting more than once?
+
+Lotta ways to do it. Cleanest, least obvious way validations. Powerful, but complicated
+
+class Vote
+  validates_uniqueness_of :creator, scope: :voteable
+
+After notes:
+reload! to reset rails console
+

@@ -2,6 +2,6 @@
 
 <%= render 'shared/content_title', title: header %>
 
-<% @category.posts.each do |post| %>
+<% @category.posts.all(:order => 'created_at DESC', :limit => 20).sort_by{|x| x.total_votes}.reverse.each do |post| %>
   <%= render 'posts/post', post: post %>
 <% end %>

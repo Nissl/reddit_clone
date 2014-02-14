@@ -17,6 +17,19 @@ class CommentsController < ApplicationController
     end
   end
 
+  def vote
+    @comment = Comment.find(params[:id])
+    @vote = Vote.create(vote: params[:vote], creator: current_user, voteable: @comment)
+    binding.pry
+    if @vote.valid?
+      @vote.save
+      flash[:notice] = "Your vote was counted, thanks!"
+    else
+      flash[:error] = "Your vote was not counted."
+    end
+    redirect_to :back
+  end
+
   private
 
   def comment_params

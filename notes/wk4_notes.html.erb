@@ -1,0 +1,211 @@
+Rails AJAX
+
+Good for when you only need a part of the page to change, particularly if expensive page that needs to hit a DB a lot. Our post index certainly qualifies. Facebook would be even more extreme. 
+
+In blackjack, there was an application.js file, using jquery syntax. 
+
+$(document).ready(function() {
+  $('#hit_form input').click(function() {// 1. Unobtrusive JS event listener
+    $.ajax({ // 2. Trigger AJAX request (following 3 lines, AJAX request - verb, url, params)
+    type: 'POST'
+    url: '/player/hit'
+    data: {param1: "hi", param2: "there"}
+    }).done(function(msg) { // 3. Handle the response - here we replace #some_element
+      $('#some_element').html(msg);
+    });
+  });
+});
+
+Click event listener. Hijack button functionality, issue AJAX asyncrhonous request, controller gives response. jQuery sits on top of Javascript, which has a lot of quirks. Used to be a huge headache, particularly due to IE. jQuery abstracts away all that junk with its own massive set of if/else statements dealing with browser incompatibility.
+
+Unobtrusive JS manipulates the DOM. This code gets used in pretty much any framework, Python, PHP, Java. 
+
+You can see how this might eventually get quite messy if you do a lot. Lots of solutions, like extracting out to objects or using a MVC on the frontend, like angular/ember/backbone. OR Rails helps you hide a little of this stuff. 
+
+Ok, how does Rails do the above example? In our index page, we're AJAXifying the vote links. 
+
+Go to post partial in rails, add remote: true to do line
+Look at html: adds data-remote="true", converts link into AJAX call very systematically, similar to data_method. That takes care of lines 1 & 2 in the above example.
+
+Need to handle differently, though. Right now we're just redirect_to :back
+
+Now we do:
+
+respond_to do |format|
+  # html method takes a block just fine
+  format.html { redirect_to :back, notice: "Your vote was counted" }
+  format.js 
+end
+
+Tries to render views/posts/vote.js.erb
+try making one with code alert('hi!');
+could say alert('total votes for <%= @post.title %> is <%= @post.total_votes %>')
+
+Works, but didn't change the UI - but you obviously have all the info you need to do that. What you want to do is update the number on the actual page. Need some way to get at that number.
+
+<span id='post_<%=post.id%>_votes'><%= @post.total_votes %></span>
+
+try in chrome console:
+$('#post_1_votes').html('hi there')
+
+So, in your vote.js.erb file
+
+$('#post_<%= @post.id %>_votes').html('<%= @post.total_votes%>')
+
+now add remote: true to the downvote as well. Coo.
+This approach is bad for something like GMail or Google maps (or my twitter/reddit site), but works great for simple page apps (like my live music & YT aggregator). So it's a bit controversial, particularly as there's a push to build more "desktop-quality" web apps.
+
+Lecture 7 pt. 2: slugging and other minor topics (admin role, timezones)
+Slugging: use a unique ID for resources that's not our IDs. posts/post_title or categories/category_title, users/user_title etc. 
+
+Here, we're just going to do posts. We (students) have 3 to do - posts, categories, users.
+Benefits: SEO - get credit in URL, security - people can guess info about your data by playing with your urls, and just in general showing primary key ideas is a poor idea.
+
+Ok, how do we change post_path(post) to use some kind of slug? Using object post, calling a method behind the scenes that returns the id. The method that is called is post.to_param
+
+Declare instance method called to_param (model level)
+def to_param
+  self.slug
+end
+
+rails generate migration add_slug_to_posts
+
+def change
+  add_column :posts, :slug, :string
+end
+
+rake db:migrate
+
+Need to populate column now. 
+
+Possible?
+def generate_slug
+  self.slug = self.title
+end
+
+IRB
+str = "My First Post"
+str.gsub(' ', '')
+str.gsub(' ', '-').downcase
+
+Now's the time to play with regex... bleah.
+rubular.com test regex
+
+regex: any non-alphanumeric characters, replace with dash
+.sub(to_be_replaced, replace) - first only
+.gsub(to_be_replaced, replace) - all replaced
+use regex in place of to_be_replaced
+
+we're just going to do 
+str.gsub(' ', '-').downcase
+
+self.slug = self.title.gsub(' ', '-').downcase
+self.save
+
+wait! don't just save, add to ActiveRecord callbacks - allows us to do something within the lifecycle of an ActiveRecord object
+
+after_save :generate_slug #wait, this will screw up bookmarks if title changes.
+#also, will still need self.save, which will trigger a loop.
+
+after_validation :generate_slug #still executes for updates
+before_save #ditto
+
+right now, none of the current data has slugs
+
+rails console
+Post.all.each {|post| post.save}
+
+Be *very* careful about doing this in production. Very, very careful. If you have a ton of data, you probably want to create a migration to do this. Put a maintenance page up, can revert, etc.
+
+Now we need to fix the controller because we just overwrote to_param
+@post = Post.find_by(slug: params[:id])
+
+--
+Simple Admin role
+Define a set of roles, with a set of permissions.
+When a user goes to do something, you need a way to check permissions. Cumbersome to build, slow, never a positive return on application unless managing permissions is a core piece. Lots of clients like it, though. Try to convince client to back away for something simple. 
+
+Good compromise? Rails apps are typically pretty simple. Have a role column on users. Takes a string. 
+
+rails generate migration add_role_to_users.rb
+
+def change
+  add_column :users, :role, :string
+end
+
+rake db: migrate
+
+class User
+  def admin?
+    self.role == 'admin'
+  end
+
+  self.role.to_s.to_sym = :admin
+
+  def moderator?
+    self.role == 'moderator'
+  end
+end
+
+Let's say only admins can create categories. 
+
+class CategoriesController
+  before_action :require_user
+  before_action :require_admin
+
+class ApplicationController
+  def require_admin
+    access_denied unless logged_in? and current_user.admin?
+  end
+
+  def access_denied
+    flash[:error] = "You can't do that"
+    redirect_to root_path 
+  end
+end
+
+--
+Time Zones yay
+
+Add a %Z to our helper to display timezone. 
+uncomment config.time_zone in application.rb
+
+see time zomes: rake -T | grep time
+rake time:zones:all
+
+rake time:zones:all | grep US
+
+rails now autoconverts
+
+But users want to set their own timezone!
+
+rails generate migration add_time_zone_to_users
+
+def change
+  add_column :users, :time_zone, :string
+end
+
+rake db:migrate
+
+user, _form
+<div class='control-group'>
+ <%= f.label :time_zone %>
+ <%= f.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones %> <!-- new to rails 4 check documentation for more options-->
+</div>
+
+def user_params
+  params.require(:user).permit(:time_zone)
+end
+
+now what?
+
+def fix_time(str)
+  if logged_in? && !current_user.time_zone.blank?
+    str = str.in_time_zone(current_user.time_zone)
+  end
+  str.strftime(%formatting code)
+end
+
+--
+Again, explanation of data-remote from solutions:
+Basically - sends in as jquery-ajax - all of that is extracted to Rails. Both this and data-method - JS that are baked into rails. These two actually work together. Transformed by built-in JS into form, and then ajax request. Data-method uses JS to put a form around things with a specified method (right?)  

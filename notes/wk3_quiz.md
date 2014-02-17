@@ -16,6 +16,8 @@ You can either use flash[:notice] or flash[:error], or if there are errors attac
 <br/><br/>
 You should store them in the users table in encrypted form in a "password_digest" column. The encryption is carried out by a gem known as bcrypt-ruby, which implements the bcrypt algorithm, the latest and greatest in one-way hashing algorithms (with adjustable slowness, a big plus given ever-increasing computer speeds!) The gem adds a salt to the password (which is also stored in the digest) prior to running the algorithm to protect against rainbow table attacks. 
 
+(Solution: note that we do this via the has_secure_password method in the User model.)
+
 You can also use gems like Devise to manage all of your authentication, but this really limits your options and so we did not learn to do it in this course.
 
 5. What should we do if we have a method that is used in both controllers and views?
@@ -51,4 +53,4 @@ You want to compress photo_id, video_id, and post_id into likeable_type and like
 
 10. What is an ERD diagram, and why do we need it?
 <br/><br/>
-It's a basic low-level diagram that shows the structure of the website at the model layer. It's a good foundation to use for building a site; it often helps expose any logic errors and it's a good thing to show to others for feedback, as we haven't sunk time into building the UI yet so it's easier to provide honest opinons.
+(Sol'n: ERD stands for Entity-Related Diagram.) It's a basic low-level diagram that shows the structure of the website at the model layer. It's a good foundation to use for building a site; it often helps expose any logic errors and it's a good thing to show to others for feedback, as we haven't sunk time into building the UI yet so it's easier to provide honest opinons.

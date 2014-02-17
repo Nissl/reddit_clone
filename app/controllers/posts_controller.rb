@@ -52,13 +52,18 @@ class PostsController < ApplicationController
   def vote
     #don't need strong paramaters because not mass assigning from input
     @vote = Vote.create(vote: params[:vote], creator: current_user, voteable: @post)
-    if @vote.valid?
-      @vote.save
-      flash[:notice] = "Your vote was counted, thanks!"
-    else
-      flash[:error] = "Your vote was not counted."
+
+    respond_to do |format|
+      format.html do 
+        if @vote.valid?
+          flash[:notice] = "Your vote was counted, thanks!"
+        else
+          flash[:error] = "Your vote was not counted."
+        end
+        redirect_to :back
+      end
+      format.js
     end
-    redirect_to :back
   end
 
   private

@@ -7,7 +7,7 @@ class User < ActiveRecord::Base
   validates :username, presence: true, uniqueness: true
   validates :password, presence: true, on: :create, length: {minimum: 5} 
 
-  after_validation :generate_slug
+  after_validation :generate_slug!
 
   def to_param
     if self.slug.blank?
@@ -17,7 +17,8 @@ class User < ActiveRecord::Base
     self.slug
   end
 
-  def generate_slug
+  # improved slugging not added because username must be unique anyway
+  def generate_slug!
     self.slug = self.username.gsub(' ', '_').gsub(/\W/, '').downcase
   end
 end

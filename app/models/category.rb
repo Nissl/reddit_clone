@@ -4,7 +4,7 @@ class Category < ActiveRecord::Base
 
   validates :name, presence: true, length: {minimum: 2}, uniqueness: true
 
-  after_validation :generate_slug
+  after_validation :generate_slug!
 
   def to_param
     if self.slug.blank?
@@ -14,7 +14,8 @@ class Category < ActiveRecord::Base
     self.slug
   end
 
-  def generate_slug
+  # improved slugging not added beacuse categories must be unique anyway
+  def generate_slug!
     self.slug = self.name.gsub(' ', '_').gsub(/\W/, '').downcase
   end
 end

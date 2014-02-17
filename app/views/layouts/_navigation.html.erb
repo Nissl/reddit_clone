@@ -9,7 +9,7 @@
     Categories <span class='caret'></span>
   <% end %>
   <ul class='dropdown-menu'>
-    <% Category.all.each do |category| %>
+    <% Category.all.sort_by{ |x| x.name.downcase }.each do |category| %>
       <li>
         <%= link_to category.name, category_path(category) %>
       </li>

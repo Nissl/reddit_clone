@@ -26,7 +26,7 @@ class CommentsController < ApplicationController
         if @vote.valid?
           flash[:notice] = "Your vote was counted, thanks!"
         else
-          flash[:error] = "Your vote was not counted."
+          flash[:error] = "You can only vote on a comment once."
         end
         redirect_to :back
       end

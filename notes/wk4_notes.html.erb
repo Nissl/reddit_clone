@@ -209,3 +209,181 @@ end
 --
 Again, explanation of data-remote from solutions:
 Basically - sends in as jquery-ajax - all of that is extracted to Rails. Both this and data-method - JS that are baked into rails. These two actually work together. Transformed by built-in JS into form, and then ajax request. Data-method uses JS to put a form around things with a specified method (right?)  
+
+JS Notes:
+//Another way to do the "else" error function:
+//Put the code in .html into the view, with style="display-hidden"
+//Code here:
+//$('#post_vote_error_<%=post.slug%>').show()
+
+//post.slug or post.to_param will both work for all of this stuff.
+
+//alert('hi!')
+//alert('Total votes for <%= @post.title %> is <%= @post.total_votes %>')
+
+Lecture 8 - final lecture of the course
+
+Voteable validations, exposing APIs, extracting common logic from model, creating & publishing gems
+
+Voteable validations
+
+(review)
+
+Exposing APIs
+
+In general... don't do this yet! Learn to build Rails first. 
+
+Browser gets to posts#show via GET '/posts/:slug'
+
+But there are other ways to get there, though. 
+
+localhost:3000/posts/:slug.js
+
+def show
+  respond_to do |format|
+    format.html # Render template. Good enough.
+    format.json do 
+      render json: @post #calls @post.to_json - parses data, builds object
+    end
+    format.xml { render xml: @post}
+  end
+end
+
+Why? Apps talk to each other. Look at Twilio API. Here's how applications interface. 
+
+curl is the same as HTTP client
+
+You rarely want to give out pure information like this about your data. How do we perform Twilio authentication? Secret token. Can use that to talk to Twilio. 
+
+Can also do before_action :verify_api_token
+
+Anyway... more advanced, don't worry about exposing, worry about consuming APIs first.
+
+Best practices: API versioning is a huge deal. Don't just change your API. Twilio versions by having a date in the URL. Old apps still go to the same route. 
+
+No exercises for that...
+
+Part 2.
+We're concerned about the redundancies at the model layer.
+
+Redundant code in post and comment models, particularly the voting calcs. Could have many more parents (e.g., Facebook you can like a lot of stuff!) 
+
+Natural to make a module and then include module
+
+Go to application.rb file. 
+config.autoload_paths += %W(#{config.root}/lib)
+
+lib/voteable.rb
+
+module Voteable #must match .rb name
+  extend ActiveSupport::Concern #new to Rails 4 - abstracts away common metaprogramming - allows ClassMethods easily, adds included hook req. ActiveSupport gem, which is part of rails
+
+  included do
+    has_many :votes, as: :voteable
+  end
+
+  def total_votes
+  end
+
+  def up_votes
+
+  def down_votes
+
+  (module ClassMethods) - don't have any, so delete 
+end
+
+class Post
+  include Voteable
+  ...
+end
+
+*restart server due to application.rb modification*
+
+class Comment
+  include Voteable
+  ...
+end
+
+remove has_many :votes, as: :voteable from posts and comments.
+
+Now... what if you want it on another project? Time to make a gem! 
+Publish to ruby-gems.org and then yank to keep namespace clean.
+
+gem list gem
+need a gem called gemcutter
+quit out of rails project, cd
+mkdir voteable-gem
+cd voteable-gem
+new file: voteable.gemspec
+
+Gem::Specification.new do |s|
+  s.name = "voteable_chris_oct"
+  s.version = "0.0.0"
+  s.date = "2013-10-23"
+  s.summary = "A voting gem"
+  s.description = "The best voting gem in the history of the universe"
+  s.authors = ['John Morgan']
+  s.email = 'jtmorgan61@gmail.com'
+  s.files = ['lib/voteable_chris_oct.rb']
+  s.homepage = 'http://github.com'
+end
+
+make lib/voteable_chris_oct.rb
+
+module VoteableChrisOct
+  (Voteable module code here)
+end
+
+in directory: $gem build voteable.gemspec
+
+$gem push voteable_chris_oct-0.0.0.gem
+
+$gem list -r voteable_chris
+
+clean out voteable module
+
+gemfile:
+gem voteable-chris-oct
+
+$bundle install --without production
+
+go back to application.rb
+require 'voteable_chris_oct' #avail app-wide
+
+class Post
+include VoteableChrisOct
+
+what if just publishing locally?
+gem 'voteable_chris_oct', path: '/Users/Chris/etc'
+
+run bundle again
+
+$gem yank voteable_chris_oct -v '0.0.0'
+
+module ClassMethods
+  def my_class_method
+    puts "this is a class method!"
+  end
+end
+
+will also extract slug gen code to module... but slightly class dependent
+a bit of metaprogramming... will give solutions
+
+next steps: course 3!
+Course 3 is a lot more, and a lot more aggressive. 60%+ content, 10 weeks
+Lots of people will be going full time here
+If not taking course 3:
+- Books
+  Next:
+  - Eloquent Ruby by Russ Olsen - best practices, syntax
+  - Everday Testing with Rspec - beginner friendly
+  
+  Intermediate:
+  - Rspec Book (pragmatic programmers) - long and thick and meaty
+
+  Advanced:
+  - PODOR - practical object-oriented design in Ruby (Sandi Metz)
+  - Design Patterns in Ruby by Russ Olsen
+
+What about learning JS? If the focus is Rails, then know enough JS to understand when you read it, but you don't need to be an expert. The best way to get a job, or even build your own project, is to know one stack well, then surround with peripheral technologies.
+

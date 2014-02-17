@@ -58,7 +58,7 @@ class PostsController < ApplicationController
         if @vote.valid?
           flash[:notice] = "Your vote was counted, thanks!"
         else
-          flash[:error] = "Your vote was not counted."
+          flash[:error] = "You can only vote on a post once."
         end
         redirect_to :back
       end

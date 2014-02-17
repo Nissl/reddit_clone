@@ -2,8 +2,8 @@
 //alert('Total votes for <%= @post.title %> is <%= @post.total_votes %>')
 
 <% if @vote.valid? %>
-  $('#post_<%= @post.id %>_votes').html('<%= @post.total_votes %>')
+  $('#post_<%= @post.slug %>_votes').html('<%= @post.total_votes %>')
 <% else %>
-  $('#post_<%= @post.id %>_vote_error_msg').html('<div class="row"><div class="span8"><div class="alert alert-error">Sorry, you can only vote on a post once.</div></div></div>');
+  $('#post_<%= @post.slug %>_vote_error_msg').html('<div class="row"><div class="span8"><div class="alert alert-error"><a class="close" data-dismiss="alert">&#215;</a>Sorry, you can only vote on a post once.</div></div></div>');
 <% end %>
 

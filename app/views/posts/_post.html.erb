@@ -6,7 +6,7 @@
       <% end %>
     <br/>
     <% end %>
-    <span id="post_<%= post.id%>_votes"><%= post.total_votes %></span> votes
+    <span id="post_<%= post.slug%>_votes"><%= post.total_votes %></span> votes
     <% if logged_in? %>
     <br/>
       <%= link_to vote_post_path(post, vote: false), method: 'post', remote: true do %>
@@ -30,4 +30,4 @@
   </div>
 </div>
 
-<span id="post_<%= post.id %>_vote_error_msg"></span>
+<span id="post_<%= post.slug %>_vote_error_msg"></span>

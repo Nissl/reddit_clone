@@ -1,6 +1,6 @@
 <% if @vote.valid? %>
   $('#comment_<%= @comment.id %>_votes').html('<%= @comment.total_votes %>')
 <% else %>
-  $('#comment_<%= @comment.id %>_vote_error_msg').html('<div class="row"><div class="span8"><div class="alert alert-error">Sorry, you can only vote on a comment once.</div></div></div>');
+  $('#comment_<%= @comment.id %>_vote_error_msg').html('<div class="row"><div class="span8"><div class="alert alert-error"><a class="close" data-dismiss="alert">&#215;</a>Sorry, you can only vote on a comment once.</div></div></div>');
 <% end %>
 

@@ -7,9 +7,11 @@ class Post < ActiveRecord::Base
 
   # min length, max length, many more options available
   # if validation failed, attaches errors - post.errors, post.errors.full_messages
-  validates :title, presence: true, length: {minimum: 8}
+  validates :title, presence: true, length: {minimum: 8}, uniqueness: true
   validates :url, presence: true, uniqueness: true
   validates :description, presence: true, length: {minimum: 10}
+
+  after_validation :generate_slug
 
   def total_votes 
     self.up_votes - self.down_votes
@@ -21,5 +23,17 @@ class Post < ActiveRecord::Base
 
   def down_votes
     self.votes.where(vote: false).size
+  end
+
+  def to_param
+    if self.slug.blank?
+      generate_slug
+      self.save
+    end
+    self.slug
+  end
+
+  def generate_slug
+    self.slug = self.title.gsub(' ', '_').gsub(/\W/, '').downcase
   end
 end

@@ -1,4 +1,5 @@
 <% post_link ||= false %>
+<span id="comment_<%= comment.id %>_vote_error_msg"></span>
 
 <div class='row'>
   <div class="span0 well text-center">
@@ -28,5 +29,3 @@
       at <%= fix_time(comment.created_at) %></span>
   </div>
 </div>
-
-<span id="comment_<%= comment.id %>_vote_error_msg"></span>

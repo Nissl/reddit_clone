@@ -11,6 +11,7 @@ class CategoriesController < ApplicationController
 
   def create
     @category = Category.new(category_params)
+    binding.pry
     @category[:name].capitalize!
 
     if @category.save

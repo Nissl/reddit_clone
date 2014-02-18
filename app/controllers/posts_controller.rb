@@ -3,6 +3,7 @@ class PostsController < ApplicationController
   #use before_action for instance variables, redirect on condition
   before_action :set_post, only: [:vote, :show, :edit, :update]
   before_action :require_user, except: [:index, :show]
+  before_action :require_creator_or_admin, only: [:edit, :update]
 
   def index
     @posts = Post.all(:order => 'created_at DESC', :limit => 50).sort_by{|x| x.total_votes}
@@ -32,12 +33,7 @@ class PostsController < ApplicationController
   end
 
   def edit
-    if current_user == @post.creator
-      @category = Category.new
-    else
-      flash[:error] = "You must be the post creator to edit"
-      redirect_to post_path(@post)
-    end
+    @category = Category.new
   end
 
   def update
@@ -77,6 +73,9 @@ class PostsController < ApplicationController
     @post = Post.find_by(slug: params[:id])
   end
 
+  def require_creator_or_admin
+    access_denied unless logged_in? and (current_user == @post.creator || current_user.admin?)
+  end
 end
 
 

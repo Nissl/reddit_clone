@@ -11,6 +11,15 @@ class PostsController < ApplicationController
 
   def show
     @comment = Comment.new
+    # respond_to do |format|
+    #   format.json do 
+    #     render json: @post #calls @post.to_json - parses data, builds object
+    #   end
+    #   format.xml do 
+    #     render xml: @post
+    #   end
+    #   format.html
+    # end
   end
 
   def new

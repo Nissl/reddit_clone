@@ -387,3 +387,108 @@ If not taking course 3:
 
 What about learning JS? If the focus is Rails, then know enough JS to understand when you read it, but you don't need to be an expert. The best way to get a job, or even build your own project, is to know one stack well, then surround with peripheral technologies.
 
+Twilio notes
+
+Your app stores an auth pin, sends it to Twilio
+Twilio sends text of token to phone
+User punches code into app to login
+
+Needs both to log in (bleah, not going to implement this.)
+
+Anyway, need some more logic built in to app to do this.
+User needs phone and pin columns. If present, assume auth turned on, otherwise turned off.
+Change login logic. Is phone number present? If not, normal login process. If yes, generate a pin number, save it into new column, send it to Twilio to sms to phone. Show form to enter pin at myapp.com/pin. But restrict access to only see it after successful login.
+
+rails generate migration add_two_factor_columns
+
+def change
+  add_column :users, :pin, :string
+  add_column :users, :phone, :string
+end
+
+rake db:migrate
+
+now, change users/new (_form)
+
+<div class='control-group'>
+  <%= f.label :phone, "Phone Number <small>numbers only</small>".html_safe %>
+  <%= f.text_field :phone, maxlength: 9 %>
+  <%= link_to '#', id: 'two_factor_phone' do %>
+    <i class='icon-question-sign'></i>
+  <% end %>
+</div>
+
+def user_params
+  params.require(:user).permit(:phone)
+end
+
+in sessions controller:
+after login (if user && user.authenticate(params[:password]))
+  if user.two_factor_auth? #user model method
+    # lock down pin page without a logged-in user
+    session[:two_factor] = true
+
+    # generate a pin
+    user.generate_pin! #user model method
+
+    # send pin to twilio, sms to user's phone
+    user.send_pin_to_twilio
+    
+    # show pin form
+    redirect_to pin_path #routes.rb
+  else 
+    stuff that was here before
+
+  def pin # Note that the get worked even without shell action! (Post wouldn't.)
+    access_denied unless session[:two_factor] == true
+    if request.post?
+      user = User.find_by(pin: params[:pin])
+      if user
+        session[:two_factor] = nil
+        # remove pin
+        user.remove_pin!
+
+        # log user in - standard login code here - can move to method login_user!(user)
+        session[:user_id] = user.id
+        flash[:notice] = "You've logged in! Welcome, #{user.username}!"
+        redirect_to root_path
+      else
+        flash[:error] = "Sorry, something is wrong with you pin number." 
+        redirect_to pin_path
+      end
+    end
+    # Get template rendered automatically
+  end
+
+class User
+  def two_factor_auth?
+    !self.phone.blank?
+  end
+
+  def generate_pin!
+    self.update_column(:pin, rand(10 ** 6)) # rand 6-digit number - need slug-type in prod.
+  end
+
+  def remove_pin!
+    self.update_column(:pin, nil)
+  end
+
+  def send_pin_to_twilio
+    (copy-pasted Twilio setup code goes here - account, auth_token, client create)
+    msg = "Hi, please input this pin to login: #{self.pin}"
+    (copy-pasted Twilio send code)
+  end
+end    
+
+routes.rb
+  get '/pin', to: 'sessions#pin'
+  post '/pin', to 'sessions#pin'
+end
+
+
+Twilio > dev tools > API Explorer > Send SMS
+can grab code
+need Twilio ruby gem - include in gem file, bundle install --without production
+
+--
+Recommended mockups: Balsamiq

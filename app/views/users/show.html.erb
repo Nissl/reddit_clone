@@ -1,13 +1,16 @@
 <%= render 'shared/content_title', title: "Profile: #{@user.username}" %>
 
 <div class="well">
-  <!-- div class='dl-horizontal' -->
-  <ul>
-    <li><strong>Username:</strong> <%= @user.username %></li>
-    <li><strong>Time zone:</strong> We didn't do this yet</li>
-    <li><strong>Two-factor auth:</strong> We didn't do this yet</li>
-    <li><strong>Phone:</strong> We didn't do this yet</li>
-  </ul>
+  <dl class='dl-horizontal'>
+    <dt>Username:</dt> 
+    <dd><%= @user.username %></dd>
+    <dt><strong>Time zone:</strong></dt> 
+    <dd><%= @user.time_zone %></dd>
+    <dt><strong>Two-factor auth:</strong></dt> 
+    <dd>We didn't do this yet</dd>
+    <dt>Phone:</dt> 
+    <dd>We didn't do this yet</dd>
+  </dl>
 </div>
 
 <h5><%= @user.username %>'s Activity:</h5>
@@ -30,7 +33,7 @@
   </div>
   <div class="tab-pane" id="comments">
     <% @user.comments.reverse.each do |comment| %>
-      <%= render 'posts/comment', comment: comment, post_link: true %>
+      <%= render 'comments/comment', comment: comment, post_link: true %>
     <% end %>
   </div>
 </div>

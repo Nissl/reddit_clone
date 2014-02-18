@@ -1,5 +1,6 @@
 class CategoriesController < ApplicationController
   before_action :require_user, only: [:new, :create]
+  before_action :require_admin, only: [:new, :create]
 
   def index
     @categories = Category.all
@@ -11,7 +12,6 @@ class CategoriesController < ApplicationController
 
   def create
     @category = Category.new(category_params)
-    binding.pry
     @category[:name].capitalize!
 
     if @category.save
